@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="../layui/css/layui.css" rel="external nofollow">
+    <script src="../layui/layui.js"></script>
+    <script src="../js/jquery.js"></script>
+    <style type="text/css">
+        .layui-form-item{
+            width: 400px;
+        }
+        .pad{
+            padding-top: 5px;
+        }
+    </style>
+    <title></title>
+</head>
+<body>
+<form id="book" class="layui-form layui-form-pane"><br><br>
+    <div class="layui-form-item">
+        <label class="layui-form-label">歌名</label>
+        <div class="layui-input-block">
+            <input type="text" name="musicname" lay-verify="required" autocomplete="off" placeholder="请输入歌名" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">歌手</label>
+        <div class="layui-input-block">
+            <input type="text" name="singerid" lay-verify="required" autocomplete="off" placeholder="请输入歌手" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">音乐图片</label>
+        <div class="layui-input-block">
+            <input type="file" id="pic" name="musicpic" lay-verify="" autocomplete="off" placeholder="请插入音乐图片" class="layui-input pad">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">音乐文件</label>
+        <div class="layui-input-block">
+            <input type="file" id="fi" name="musicfile" lay-verify="" autocomplete="off" placeholder="请插入音乐文件" class="layui-input pad">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">歌词</label>
+        <div class="layui-input-block">
+            <input type="file" id="word" name="musicword" lay-verify="" autocomplete="off" placeholder="请插入歌词" class="layui-input pad">
+        </div>
+    </div>
+    <!--    <div class="layui-form-item">-->
+    <!--        <label class="layui-form-label">性别</label>-->
+    <!--        <div class="layui-input-block">-->
+    <!--            <select name="usersex" lay-verify="required">-->
+    <!--                <option value="">-&#45;&#45;请选择-&#45;&#45;</option>-->
+    <!--                <option value="男">男</option>-->
+    <!--                <option value="女">女</option>-->
+    <!--            </select>-->
+    <!--        </div>-->
+    <!--    </div>-->
+    <div class="layui-form-item">
+        <label class="layui-form-label">时长</label>
+        <div class="layui-input-block">
+            <input type="text" name="musictime" lay-verify="required" autocomplete="off" placeholder="请输入时长" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" style="text-align:center;">
+        <button type="button" id="submit" lay-submit="" lay-filter="book" class="layui-btn layui-btn-normal">保存</button>
+        <button type="reset" class="layui-btn">重置</button>
+    </div>
+</form>
+</body>
+<script type="text/javascript">
+    let form, $, imgbyte1, imgbyte2, imgbyte3;
+    $ = layui.$;
+    $("#pic").change(function(e) { //监听input内容改变
+        var exSrc = e.target;
+        exGetImg(exSrc);//调用获取图片信息的方法
+    })
+    var exGetImg = function(extag) {
+        var file = extag.files[0];//选中文件的第一个文件（当成固定的格式）
+        var readers = new FileReader();//新建文件阅读对象，来转意路径
+        readers.readAsDataURL(file);//将读取的文件路径，将路径转换为url类型
+        readers.onload = function() {//转换之后调用onload（）方法
+            var imgsSrc = this.result;//图片地址读出来之后result结果为 DataURL  //this.result  为图片转化的url路径
+            imgbyte1 = imgsSrc.replace(/^data:image\/\w+;base64,/, '')
+        }
+    }
+    $("#fi").change(function(e) { //监听input内容改变
+        var exSrc = e.target;
+        exGetfi(exSrc);//调用获取图片信息的方法
+    })
+    var exGetfi = function(extag) {
+        var file = extag.files[0];//选中文件的第一个文件（当成固定的格式）
+        var readers = new FileReader();//新建文件阅读对象，来转意路径
+        readers.readAsDataURL(file);//将读取的文件路径，将路径转换为url类型
+        readers.onload = function() {//转换之后调用onload（）方法
+            var imgsSrc = this.result;//图片地址读出来之后result结果为 DataURL  //this.result  为图片转化的url路径
+            imgbyte2 = imgsSrc.replace(/^data:audio\/\w+;base64,/, '')
+        }
+    }
+    $("#word").change(function(e) { //监听input内容改变
+        var exSrc = e.target;
+        exGetword(exSrc);//调用获取图片信息的方法
+    })
+    var exGetword = function(extag) {
+        var file = extag.files[0];//选中文件的第一个文件（当成固定的格式）
+        var readers = new FileReader();//新建文件阅读对象，来转意路径
+        readers.readAsDataURL(file);//将读取的文件路径，将路径转换为url类型
+        readers.onload = function() {//转换之后调用onload（）方法
+            var imgsSrc = this.result;//图片地址读出来之后result结果为 DataURL  //this.result  为图片转化的url路径
+            imgbyte3 = imgsSrc.replace(/^data:text\/\w+;base64,/, '')
+        }
+    }
+    var url = document.URL;
+    var eid = url.split("=")[1]
+    $.ajax({
+        url: "/song/"+eid,
+        type: "get",
+        dataType: "json",
+        contentType: "application/json;charset=UTF-8",
+        success: function (res) {
+            console.log(res)
+            var data1 = res.data[0]
+            $("input[name=musicname]").val(data1.musicname)
+            $("input[name=singerid]").val(data1.singerid)
+            $("input[name=musictime]").val(data1.musictime)
+        }
+    })
+    layui.use(['form'], function(){
+        form = layui.form;
+        //监听提交
+        form.on('submit(book)', function(data){
+            data.field.musicpic = imgbyte1
+            data.field.musicfile = imgbyte2
+            data.field.musicword = imgbyte3
+            console.log(data)
+            $.ajax({
+                url: '/song',
+                type: "patch",
+                dataType: "json",
+                contentType: "application/json;charset=UTF-8",
+                data: JSON.stringify({
+                    musicid: eid,
+                    musicname: data.field.musicname,
+                    singerid: data.field.singerid,
+                    musicpic: data.field.musicpic,
+                    musicfile: data.field.musicfile,
+                    musicword: data.field.musicword,
+                    musictime: data.field.musictime
+                }),
+                success: function(res) {
+                    if(res == true) {
+                        layer.alert('修改成功', function() {
+                            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                            parent.layer.close(index);
+                            parent.location.reload()
+                        });
+
+                    } else {
+                        layer.alert('修改不成功', {icon: 5});
+                    }
+                }
+            })
+            return false;
+        });
+    });
+</script>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>歌曲用户列表</title>
+  <link rel="stylesheet" href="../layui/css/layui.css" rel="external nofollow">
+  <script src="../layui/layui.js"></script>
+  <script src="../js/jquery.js"></script>
+</head>
+<body style="padding-left: 10px;padding-right: 10px;">
+<div class="searchTable">
+  ID：
+  <div class="layui-inline">
+    <input class="layui-input" name="userName" id="userName" autocomplete="off">
+  </div>
+  <button id="searchBtn" class="layui-btn" data-type="reload">搜索</button>
+</div>
+<table class="layui-hide" id="test"></table>
+
+<script>
+  layui.use('table', function() {
+    var table = layui.table;
+    table.render({
+      elem: '#test',
+      url: '/song',
+      toolbar: '#toolbarDemo', //开启头部工具栏，并为其绑定左侧模板
+      page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+        layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'], //自定义分页布局
+        //,curr: 5 //设定初始在第 5 页
+        groups: 1, //只显示 1 个连续页码
+        limit: 10, //默认的第一个每页记录数
+        limits : [50,100,150], //记录数的选择范围
+        first: false, //不显示首页
+        last: false //不显示尾页
+      },
+      cols: [
+        [{
+          type: 'checkbox',
+          fixed:'left'
+        }, {
+          field: 'musicid',
+          align:'center',
+          title: 'ID',
+          sort: true
+        }, {
+          field: 'musicname',
+          align:'center',
+          title: '歌名'
+        }, {
+          field:'singerid',
+          align:'center',
+          title:'歌手'
+        },{
+          field: 'musicpic',
+          align:'center',
+          title: '音乐图片',
+          templet: function (data) {
+            var str = "http://localhost/pic/song/" + data.musicid;
+            return "<img style='width: 26px' src='"+str+"'/>"
+          }
+        }, {
+          field: 'musictime',
+          align:'center',
+          title: '时长'
+        },{
+          fixed: 'right',
+          title: '操作',
+          toolbar: '#barDemo'
+        }]
+      ]
+    });
+    //查询
+    var $ = layui.$, active = {
+      reload: function(){
+        //查询条件组装
+        var queryWhere = $('#userName').val();
+        //执行重载
+        table.reload('test', {
+          page: {
+            curr: 1 //重新从第 1 页开始
+          },
+          url: '/song/'+queryWhere,//后台做模糊搜索接口路径
+          method: 'get'
+        }, 'data');
+      }
+    };
+    $('.searchTable .layui-btn').on('click', function(){
+      var type = $(this).data('type');
+      active[type] ? active[type].call(this) : '';
+    });
+
+    //添加
+    table.on('toolbar(test)', function(obj) {
+      // debugger;
+      //var checkStatus = table.checkStatus(obj.config.id);
+      switch (obj.event) {
+        case 'add':
+        {
+          var addIndex = layer.open({
+            type: 2,
+            area: ['700px', '600px'],
+            fixed: true, //固定
+            maxmin: true,
+            content: "songAdd.html", //url自定义
+          });
+          layer.full(addIndex);
+        }
+          break;
+      };
+    });
+
+
+    //删除修改
+    table.on('tool(test)', function(obj){
+      var data = obj.data;
+      if(obj.event === 'edit'){
+        var updateIndex = layer.open({
+          type: 2,
+          area: ['700px', '600px'],
+          fixed: false, //不固定
+          maxmin: true,
+          content: "songUpdate.html?songid="+data.musicid, //url自定义
+        });
+        layer.full(updateIndex);
+      }
+      else if(obj.event === 'del') {
+        layer.open({
+          content: '确认删除？',
+          btnAlign: 'c',
+          title: '提示',
+          btn: ['确定', '取消'],
+          yes: function (index, layero) {
+            $.ajax({
+              url: '/song/'+data.musicid,
+              type: 'delete',
+              dataType: "json",
+              contentType: "application/json;charset=UTF-8",
+              success: function (data) {
+                if (data === true) {
+                  window.location.reload();
+                } else {
+                  layer.alert('删除失败');
+                }
+              },
+              error: function (data) {
+                layer.alert('系统登录超时或遇到意外错误，请重新登录，或联系系统管理员!');
+              },
+            })
+          }
+        })
+      }
+    });
+  });
+
+</script>
+
+<!-- 操作栏的两个内容，id要和toolbar的一样 -->
+<script type="text/html" id="barDemo">
+  <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<!-- 头部工具栏按钮 -->
+<script type="text/html" id="toolbarDemo">
+  <div class="layui-btn-container">
+    <button class="layui-btn layui-btn-sm" lay-event="add">新增</button>
+    <button class="layui-btn layui-btn-sm" lay-event="del">删除</button>
+  </div>
+</script>
+</body>
+</html>

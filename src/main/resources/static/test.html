@@ -1,0 +1,28 @@
+<img style="width: 100px" src="http://localhost/pic/user">
+<!--<iframe src="http://localhost/pic/user"></iframe>-->
+<input id="pic" type="file">
+<button onclick="get()">input</button>
+<div class="div-img">
+</div>
+<script src="./js/jquery.js"></script>
+<script>
+    $("#pic").change(function(e) { //监听input内容改变
+        var exSrc = e.target;
+        exGetImg(exSrc);//调用获取图片信息的方法
+    })
+    var exGetImg = function(extag) {
+        var file = extag.files[0];//选中文件的第一个文件（当成固定的格式）
+        var readers = new FileReader();//新建文件阅读对象，来转意路径
+        readers.readAsDataURL(file);//将读取的文件路径，将路径转换为url类型
+        readers.onload = function() {//转换之后调用onload（）方法
+            var imgsSrc = this.result;//图片地址读出来之后result结果为 DataURL  //this.result  为图片转化的url路径
+            let imgbase = imgsSrc.replace(/^data:image\/\w+;base64,/, '')
+            console.log(imgsSrc)//显示出来图片的url路径，可以直接赋给img的src属性
+            var creatmp3 = '<audio controls="controls" loop="loop">\n' +
+                '    <source src="' + imgsSrc + '" type="audio/mp3">\n' +
+                '</audio>';//生成一个图片标签，路径和为表单的内容（即路径）
+            var creatImg = '<img src="' + imgsSrc + '"/>';//生成一个图片标签，路径和为表单的内容（即路径）
+            var imgDiv = $('.div-img').append(creatmp3);//将这个图片标签插入到指定位置,照片显示。
+        }
+    }
+</script>
